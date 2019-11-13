@@ -43,7 +43,7 @@ void OnReceivedWorker(const AMQP::Message &msg) {
     TextMapReader span_reader(carrier);
     auto parent_span = opentracing::Tracer::Global()->Extract(span_reader);
     auto span = opentracing::Tracer::Global()->StartSpan(
-        "FanoutHomeTimelines",
+        "write_home_timeline_server",
         {opentracing::ChildOf(parent_span->get())});
     std::map<std::string, std::string> writer_text_map;
     TextMapWriter writer(writer_text_map);
@@ -82,7 +82,7 @@ void OnReceivedWorker(const AMQP::Message &msg) {
 
     // Update Redis ZSet
     auto redis_span = opentracing::Tracer::Global()->StartSpan(
-        "RedisUpdate", {opentracing::ChildOf(&span->context())});
+        "redis_update_client", {opentracing::ChildOf(&span->context())});
     auto redis_client_wrapper = _redis_client_pool->Pop();
     if (!redis_client_wrapper) {
       ServiceException se;

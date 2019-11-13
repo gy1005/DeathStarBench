@@ -1,0 +1,11 @@
+.git
+.gitignore
+build
+.vscode
+docker
+media-frontend
+nginx-web-server
+scripts
+wrk2
+
+*.png

@@ -223,8 +223,8 @@ local HomeTimelineServiceIface = __TObject:new{
 
 local HomeTimelineServiceProcessor = __TObject.new(__TProcessor
 , {
- __type = 'HomeTimelineServiceProcessor'
-})
+      __type = 'HomeTimelineServiceProcessor'
+    })
 
 function HomeTimelineServiceProcessor:process(iprot, oprot, server_ctx)
   local name, mtype, seqid = iprot:readMessageBegin()
@@ -265,4 +265,6 @@ function HomeTimelineServiceProcessor:process_ReadHomeTimeline(seqid, iprot, opr
   oprot.trans:flush()
 end
 
-return HomeTimelineServiceClient
+return {
+  HomeTimelineServiceClient = HomeTimelineServiceClient
+}

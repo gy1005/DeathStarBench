@@ -29,8 +29,6 @@ int main(int argc, char *argv[]) {
   }
 
   int port = config_json["compose-post-service"]["port"];
-  int redis_port = config_json["compose-post-redis"]["port"];
-  std::string redis_addr = config_json["compose-post-redis"]["addr"];
   int rabbitmq_port = config_json["write-home-timeline-rabbitmq"]["port"];
   std::string rabbitmq_addr =
       config_json["write-home-timeline-rabbitmq"]["addr"];
@@ -41,14 +39,37 @@ int main(int argc, char *argv[]) {
   int user_timeline_port = config_json["user-timeline-service"]["port"];
   std::string user_timeline_addr = config_json["user-timeline-service"]["addr"];
 
-  ClientPool<RedisClient> redis_client_pool("redis", redis_addr, redis_port,
-                                            0, 128, 1000);
+  int text_port = config_json["text-service"]["port"];
+  std::string text_addr = config_json["text-service"]["addr"];
+
+  int user_port = config_json["user-service"]["port"];
+  std::string user_addr = config_json["user-service"]["addr"];
+
+  int media_port = config_json["media-service"]["port"];
+  std::string media_addr = config_json["media-service"]["addr"];
+
+  int unique_id_port = config_json["unique-id-service"]["port"];
+  std::string unique_id_addr = config_json["unique-id-service"]["addr"];
+
+
   ClientPool<ThriftClient<PostStorageServiceClient>>
       post_storage_client_pool("post-storage-client", post_storage_addr,
                                post_storage_port, 0, 128, 1000);
   ClientPool<ThriftClient<UserTimelineServiceClient>>
       user_timeline_client_pool("user-timeline-client", user_timeline_addr,
                                 user_timeline_port, 0, 128, 1000);
+  ClientPool<ThriftClient<TextServiceClient>>
+      text_client_pool("text-service-client",text_addr,
+                       text_port, 0, 128, 1000);
+  ClientPool<ThriftClient<UserServiceClient>>
+      user_client_pool("user-service-client", user_addr,
+                       user_port, 0, 128, 1000);
+  ClientPool<ThriftClient<MediaServiceClient>>
+      media_client_pool("media-service-client", media_addr,
+                        media_port, 0, 128, 1000);
+  ClientPool<ThriftClient<UniqueIdServiceClient>>
+      unique_id_client_pool("unique-id-service-client", unique_id_addr,
+                                unique_id_port, 0, 128, 1000);
 
   ClientPool<RabbitmqClient> rabbitmq_client_pool("rabbitmq", rabbitmq_addr,
       rabbitmq_port, 0, 128, 1000);
@@ -56,9 +77,12 @@ int main(int argc, char *argv[]) {
   TThreadedServer server(
       std::make_shared<ComposePostServiceProcessor>(
           std::make_shared<ComposePostHandler>(
-              &redis_client_pool,
               &post_storage_client_pool,
               &user_timeline_client_pool,
+              &user_client_pool,
+              &unique_id_client_pool,
+              &media_client_pool,
+              &text_client_pool,
               &rabbitmq_client_pool)),
       std::make_shared<TServerSocket>("0.0.0.0", port),
       std::make_shared<TFramedTransportFactory>(),

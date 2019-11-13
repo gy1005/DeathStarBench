@@ -60,7 +60,7 @@ void UserTimelineHandler::WriteUserTimeline(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "WriteUserTimeline",
+      "write_user_timeline_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 
@@ -83,77 +83,43 @@ void UserTimelineHandler::WriteUserTimeline(
   }
   bson_t *query = bson_new();
 
-  BSON_APPEND_INT64(query, "user_id", user_id);
-  auto find_span = opentracing::Tracer::Global()->StartSpan(
-      "MongoFindUser", {opentracing::ChildOf(&span->context())});
-  mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
-      collection, query, nullptr, nullptr);
-  const bson_t *doc;
-  bool found = mongoc_cursor_next(cursor, &doc);
-  if (!found) {
-    bson_t *new_doc = BCON_NEW(
-        "user_id", BCON_INT64(user_id),
-        "posts",
-        "[", "{", "post_id", BCON_INT64(post_id),
-        "timestamp", BCON_INT64(timestamp), "}", "]"
-    );
-    bson_error_t error;
-    auto insert_span = opentracing::Tracer::Global()->StartSpan(
-        "MongoInsert", {opentracing::ChildOf(&span->context())});
-    bool inserted = mongoc_collection_insert_one(
-        collection, new_doc, nullptr, nullptr, &error);
-    insert_span->Finish();
-    if (!inserted) {
-      LOG(error) << "Failed to insert user timeline user " << user_id
-                 << " to MongoDB: " << error.message;
-      ServiceException se;
-      se.errorCode = ErrorCode::SE_MONGODB_ERROR;
-      se.message = error.message;
-      bson_destroy(new_doc);
-      bson_destroy(query);
-      mongoc_cursor_destroy(cursor);
-      mongoc_collection_destroy(collection);
-      mongoc_client_pool_push(_mongodb_client_pool, mongodb_client);
-      throw se;
-    }
-    bson_destroy(new_doc);
-  } else {
-    bson_t *update = BCON_NEW(
-        "$push", "{",
-            "posts", "{",
-                "$each", "[", "{",
-                    "post_id", BCON_INT64(post_id),
-                    "timestamp", BCON_INT64(timestamp),
-                "}", "]",
-                "$position", BCON_INT32(0),
-            "}",
-        "}"
-    );
-    bson_error_t error;
-    bson_t reply;
-    auto update_span = opentracing::Tracer::Global()->StartSpan(
-        "MongoInsert", {opentracing::ChildOf(&span->context())});
-    bool updated = mongoc_collection_find_and_modify(
-        collection, query, nullptr, update, nullptr, false, false,
-        true, &reply, &error);
-    update_span->Finish();
-    if (!updated) {
-      LOG(error) << "Failed to update user-timeline for user " << user_id
-                 << " to MongoDB: " << error.message;
-      ServiceException se;
-      se.errorCode = ErrorCode::SE_MONGODB_ERROR;
-      se.message = error.message;
-      bson_destroy(update);
-      bson_destroy(query);
-      bson_destroy(&reply);
-      mongoc_cursor_destroy(cursor);
-      mongoc_collection_destroy(collection);
-      mongoc_client_pool_push(_mongodb_client_pool, mongodb_client);
-      throw se;
-    }
+  BSON_APPEND_INT64(query, "user_id", user_id);  
+  bson_t *update = BCON_NEW(
+      "$push", "{",
+          "posts", "{",
+              "$each", "[", "{",
+                  "post_id", BCON_INT64(post_id),
+                  "timestamp", BCON_INT64(timestamp),
+              "}", "]",
+              "$position", BCON_INT32(0),
+          "}",
+      "}"
+  );
+  bson_error_t error;
+  bson_t reply;
+  auto update_span = opentracing::Tracer::Global()->StartSpan(
+      "mongo_insert_client", {opentracing::ChildOf(&span->context())});
+  bool updated = mongoc_collection_find_and_modify(
+      collection, query, nullptr, update, nullptr, false, true,
+      true, &reply, &error);
+  update_span->Finish();
+  if (!updated) {
+    LOG(error) << "Failed to update user-timeline for user " << user_id
+                << " to MongoDB: " << error.message;
+    ServiceException se;
+    se.errorCode = ErrorCode::SE_MONGODB_ERROR;
+    se.message = error.message;
     bson_destroy(update);
+    bson_destroy(query);
     bson_destroy(&reply);
+    mongoc_cursor_destroy(cursor);
+    mongoc_collection_destroy(collection);
+    mongoc_client_pool_push(_mongodb_client_pool, mongodb_client);
+    throw se;
   }
+  bson_destroy(update);
+  bson_destroy(&reply);
+  
   bson_destroy(query);
   mongoc_cursor_destroy(cursor);
   mongoc_collection_destroy(collection);
@@ -168,7 +134,7 @@ void UserTimelineHandler::WriteUserTimeline(
   }
   auto redis_client = redis_client_wrapper->GetClient();
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "RedisUpdate", {opentracing::ChildOf(&span->context())});
+      "redis_update_client", {opentracing::ChildOf(&span->context())});
   auto num_posts = redis_client->zcard(std::to_string(user_id));
   redis_client->sync_commit();
   auto num_posts_reply = num_posts.get();
@@ -199,7 +165,7 @@ void UserTimelineHandler::ReadUserTimeline(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "ReadUserTimeline",
+      "read_user_timeline_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 
@@ -216,7 +182,7 @@ void UserTimelineHandler::ReadUserTimeline(
   }
   auto redis_client = redis_client_wrapper->GetClient();
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "RedisFind", {opentracing::ChildOf(&span->context())});
+      "redis_find_client", {opentracing::ChildOf(&span->context())});
   auto post_ids_future = redis_client->zrevrange(
       std::to_string(user_id), start, stop - 1);
   redis_client->commit();
@@ -270,7 +236,7 @@ void UserTimelineHandler::ReadUserTimeline(
         "}");
 
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "MongoFindUserTimeline", { opentracing::ChildOf(&span->context()) });
+        "mongo_find_client", { opentracing::ChildOf(&span->context()) });
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, opts, nullptr);
     find_span->Finish();
@@ -346,7 +312,7 @@ void UserTimelineHandler::ReadUserTimeline(
     }
     redis_client = redis_client_wrapper->GetClient();
     auto redis_update_span = opentracing::Tracer::Global()->StartSpan(
-        "RedisUpdate", {opentracing::ChildOf(&span->context())});
+        "redis_update_client", {opentracing::ChildOf(&span->context())});
     std::string user_id_str = std::to_string(user_id);
     redis_client->del(std::vector<std::string>{user_id_str});
     std::vector<std::string> options{"NX"};

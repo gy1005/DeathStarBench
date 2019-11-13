@@ -8,13 +8,14 @@ function _M.Follow()
   local bridge_tracer = require "opentracing_bridge_tracer"
   local ngx = ngx
   local GenericObjectPool = require "GenericObjectPool"
-  local SocialGraphServiceClient = require "social_network_SocialGraphService"
+  local social_network_SocialGraphService = require "social_network_SocialGraphService"
+  local SocialGraphServiceClient = social_network_SocialGraphService.SocialGraphServiceClient
 
   local req_id = tonumber(string.sub(ngx.var.request_id, 0, 15), 16)
   local tracer = bridge_tracer.new_from_global()
   local parent_span_context = tracer:binary_extract(
       ngx.var.opentracing_binary_context)
-  local span = tracer:start_span("Follow",
+  local span = tracer:start_span("follow_client",
       {["references"] = {{"child_of", parent_span_context}}})
   local carrier = {}
   tracer:text_map_inject(span:context(), carrier)

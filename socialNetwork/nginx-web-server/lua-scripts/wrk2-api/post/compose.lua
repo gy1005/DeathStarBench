@@ -87,12 +87,15 @@ function _M.ComposePost()
   local bridge_tracer = require "opentracing_bridge_tracer"
   local ngx = ngx
   local cjson = require "cjson"
-  local jwt = require "resty.jwt"
+
+  local GenericObjectPool = require "GenericObjectPool"
+  local social_network_ComposePostService = require "social_network_ComposePostService"
+  local ComposePostServiceClient = social_network_ComposePostService.ComposePostServiceClient
 
   local req_id = tonumber(string.sub(ngx.var.request_id, 0, 15), 16)
   local tracer = bridge_tracer.new_from_global()
   local parent_span_context = tracer:binary_extract(ngx.var.opentracing_binary_context)
-  local span = tracer:start_span("ComposePost",
+  local span = tracer:start_span("compose_post_client",
       { ["references"] = { { "child_of", parent_span_context } } })
   local carrier = {}
   tracer:text_map_inject(span:context(), carrier)
@@ -108,27 +111,33 @@ function _M.ComposePost()
     ngx.exit(ngx.HTTP_BAD_REQUEST)
   end
 
-  local threads = {
-    ngx.thread.spawn(_UploadMedia, req_id, post, carrier),
-    ngx.thread.spawn(_UploadUserId, req_id, post, carrier),
-    ngx.thread.spawn(_UploadText, req_id, post, carrier),
-    ngx.thread.spawn(_UploadUniqueId, req_id, post, carrier)
-  }
+  local status, ret
 
-  local status = ngx.HTTP_OK
-  for i = 1, #threads do
-    local ok, res = ngx.thread.wait(threads[i])
-    if not ok then
-      status = ngx.HTTP_INTERNAL_SERVER_ERROR
-      ngx.exit(status)
+  local compose_post_client = GenericObjectPool:connection(
+      ComposePostServiceClient, "compose-post-service", 9090)
+
+  if (not _StrIsEmpty(post.media_ids) and not _StrIsEmpty(post.media_types)) then
+    status, ret = pcall(compose_post_client.ComposePost, compose_post_client,
+        req_id, post.username, tonumber(post.user_id), post.text,
+        cjson.decode(post.media_ids), cjson.decode(post.media_types),
+        tonumber(post.post_type), carrier)
+  else
+    status, ret = pcall(compose_post_client.ComposePost, compose_post_client,
+        req_id, post.username, tonumber(post.user_id), post.text,
+       {}, {}, tonumber(post.post_type), carrier)
+  end
+  if not status then
+    ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
+    if (ret.message) then
+      ngx.say("compost_post failure: " .. ret.message)
+      ngx.log(ngx.ERR, "compost_post failure: " .. ret.message)
     end
   end
+
+  ngx.status = ngx.HTTP_OK
   ngx.say("Successfully upload post")
   span:finish()
   ngx.exit(status)
 end
-
-
-
 
 return _M

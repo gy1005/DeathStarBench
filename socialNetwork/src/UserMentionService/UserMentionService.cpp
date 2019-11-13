@@ -40,8 +40,6 @@ int main(int argc, char *argv[]) {
   }
 
   int port = config_json["user-mention-service"]["port"];
-  const std::string compose_post_addr = config_json["compose-post-service"]["addr"];
-  int compose_post_port = config_json["compose-post-service"]["port"];
 
   memcached_client_pool =
       init_memcached_client_pool(config_json, "user", 32, 128);
@@ -49,14 +47,11 @@ int main(int argc, char *argv[]) {
   if (memcached_client_pool == nullptr || mongodb_client_pool == nullptr) {
     return EXIT_FAILURE;
   }
-  ClientPool<ThriftClient<ComposePostServiceClient>> compose_post_client_pool(
-      "compose-post", compose_post_addr, compose_post_port, 0, 128, 1000);
 
   TThreadedServer server (
       std::make_shared<UserMentionServiceProcessor>(
           std::make_shared<UserMentionHandler>(
-              memcached_client_pool, mongodb_client_pool,
-              &compose_post_client_pool)),
+              memcached_client_pool, mongodb_client_pool)),
       std::make_shared<TServerSocket>("0.0.0.0", port),
       std::make_shared<TFramedTransportFactory>(),
       std::make_shared<TBinaryProtocolFactory>()

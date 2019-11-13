@@ -11,7 +11,7 @@ services:
 #      - /etc/resolv.conf:/etc/resolv.conf
 
   social-graph-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: social-graph-service
 #    ports:
 #      - 10000:9090
@@ -33,7 +33,7 @@ services:
     restart: always
 
   write-home-timeline-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: write-home-timeline-service
     restart: always
     entrypoint: WriteHomeTimelineService
@@ -59,7 +59,7 @@ services:
     restart: always
 
   compose-post-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: compose-post-service
 #    ports:
 #      - 10001:9090
@@ -76,7 +76,7 @@ services:
     restart: always
 
   post-storage-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: post-storage-service
     ports:
       - 10002:9090
@@ -98,7 +98,7 @@ services:
     restart: always
 
   user-timeline-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: user-timeline-service
 #    ports:
 #      - 10003:9090
@@ -120,7 +120,7 @@ services:
     restart: always
 
   url-shorten-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: url-shorten-service
 #    ports:
 #      - 10004:9090
@@ -142,7 +142,7 @@ services:
     restart: always
 
   user-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: user-service
 #    ports:
 #      - 10005:9090
@@ -164,7 +164,7 @@ services:
     restart: always
 
   media-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: media-service
 #    ports:
 #      - 10006:9090
@@ -186,7 +186,7 @@ services:
     restart: always
 
   text-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: text-service
 #    ports:
 #      - 10007:9090
@@ -194,7 +194,7 @@ services:
     entrypoint: TextService
 
   unique-id-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: unique-id-service
 #    ports:
 #      - 10008:9090
@@ -202,7 +202,7 @@ services:
     entrypoint: UniqueIdService
 
   user-mention-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: user-mention-service
 #    ports:
 #      - 10009:9090
@@ -210,7 +210,7 @@ services:
     entrypoint: UserMentionService
 
   home-timeline-service:
-    image: yg397/social-network-microservices
+    image: yg397/social-network-microservices:root_cause
     hostname: home-timeline-service
 #    ports:
 #      - 10010:9090

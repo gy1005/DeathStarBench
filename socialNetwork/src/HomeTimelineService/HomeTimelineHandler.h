@@ -52,7 +52,7 @@ void ReadHomeTimelineHandler::ReadHomeTimeline(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "ReadHomeTimeline",
+      "read_home_timeline_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 
@@ -69,7 +69,7 @@ void ReadHomeTimelineHandler::ReadHomeTimeline(
   }
   auto redis_client = redis_client_wrapper->GetClient();
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "RedisFind", {opentracing::ChildOf(&span->context())});
+      "redis_find_client", {opentracing::ChildOf(&span->context())});
   auto post_ids_future = redis_client->zrevrange(
       std::to_string(user_id), start, stop - 1);
   redis_client->sync_commit();

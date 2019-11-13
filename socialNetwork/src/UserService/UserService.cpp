@@ -34,8 +34,6 @@ int main(int argc, char *argv[]) {
   std::string secret = config_json["secret"];
 
   int port = config_json["user-service"]["port"];
-  std::string compose_post_addr = config_json["compose-post-service"]["addr"];
-  int compose_post_port = config_json["compose-post-service"]["port"];
   std::string social_graph_addr = config_json["social-graph-service"]["addr"];
   int social_graph_port = config_json["social-graph-service"]["port"];
 
@@ -54,9 +52,6 @@ int main(int argc, char *argv[]) {
   }
 
   std::mutex thread_lock;
-
-  ClientPool<ThriftClient<ComposePostServiceClient>> compose_post_client_pool(
-      "compose-post", compose_post_addr, compose_post_port, 0, 128, 1000);
 
   ClientPool<ThriftClient<SocialGraphServiceClient>> social_graph_client_pool(
       "social-graph", social_graph_addr, social_graph_port, 0, 128, 1000);
@@ -84,7 +79,6 @@ int main(int argc, char *argv[]) {
               secret,
               memcached_client_pool,
               mongodb_client_pool,
-              &compose_post_client_pool,
               &social_graph_client_pool)),
       std::make_shared<TServerSocket>("0.0.0.0", port),
       std::make_shared<TFramedTransportFactory>(),
