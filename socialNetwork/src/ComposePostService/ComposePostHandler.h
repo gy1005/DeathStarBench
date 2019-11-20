@@ -147,7 +147,7 @@ Creator ComposePostHandler::_ComposeCreaterHelper(
     span->Finish();
     throw;
   }
-
+  _user_service_client_pool->Push(user_client_wrapper);
   span->Finish();
   return _return_creator;
 }
@@ -183,7 +183,7 @@ TextServiceReturn ComposePostHandler::_ComposeTextHelper(
     span->Finish();
     throw;
   }
-
+  _text_service_client_pool->Push(text_client_wrapper);
   span->Finish();
   return _return_text;
 }
@@ -219,7 +219,7 @@ std::vector<Media> ComposePostHandler::_ComposeMediaHelper(
     span->Finish();
     throw;
   }
-
+  _media_service_client_pool->Push(media_client_wrapper);
   span->Finish();
   return _return_media;
 }
@@ -254,7 +254,7 @@ int64_t ComposePostHandler::_ComposeUniqueIdHelper(
     span->Finish();
     throw;
   }
-
+  _unique_id_service_client_pool->Push(unique_id_client_wrapper);
   span->Finish();
   return _return_unique_id;
 }

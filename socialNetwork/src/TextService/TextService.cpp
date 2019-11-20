@@ -30,16 +30,20 @@ int main(int argc, char *argv[]) {
 
     std::string url_addr = config_json["url-shorten-service"]["addr"];
     int url_port = config_json["url-shorten-service"]["port"];
+    int url_conns = config_json["url-shorten-service"]["connections"];
+    int url_timeout = config_json["url-shorten-service"]["timeout_ms"];
 
     std::string user_mention_addr = config_json["user-mention-service"]["addr"];
     int user_mention_port = config_json["user-mention-service"]["port"];
+    int user_mention_conns = config_json["user-mention-service"]["connections"];
+    int user_mention_timeout = config_json["user-mention-service"]["timeout_ms"];
 
     ClientPool<ThriftClient<UrlShortenServiceClient>> url_client_pool(
-        "url-shorten-service", url_addr, url_port, 0, 128, 1000);
+        "url-shorten-service", url_addr, url_port, 0, url_conns, url_timeout);
 
     ClientPool<ThriftClient<UserMentionServiceClient>> user_mention_pool(
         "user-mention-service", user_mention_addr,
-        user_mention_port, 0, 128, 1000);
+        user_mention_port, 0, user_mention_conns, user_mention_timeout);
 
     TThreadedServer server(
         std::make_shared<TextServiceProcessor>(

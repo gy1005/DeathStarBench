@@ -1,0 +1,364 @@
+services:
+  compose-post-service:
+    depends_on:
+    - write-home-timeline-rabbitmq
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: ComposePostService
+    hostname: compose-post-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  home-timeline-redis:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: home-timeline-redis
+    image: redis
+  home-timeline-service:
+    depends_on:
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: HomeTimelineService
+    hostname: home-timeline-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  jaeger:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    environment:
+    - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    hostname: jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+    - 16686:16686
+  media-frontend:
+    depends_on:
+    - jaeger
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: media-frontend
+    image: yg397/media-frontend:xenial
+    ports:
+    - 8091:8080
+    volumes:
+    - ./media-frontend/lua-scripts:/usr/local/openresty/nginx/lua-scripts
+    - ./media-frontend/conf/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+  media-memcached:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: media-memcached
+    image: memcached
+  media-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: media-mongodb
+    image: mongo
+  media-service:
+    depends_on:
+    - media-mongodb
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: MediaService
+    hostname: media-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  nginx-web-server:
+    depends_on:
+    - jaeger
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: nginx-web-server
+    image: yg397/openresty-thrift:xenial
+    ports:
+    - 8090:8080
+    volumes:
+    - ./nginx-web-server/lua-scripts:/usr/local/openresty/nginx/lua-scripts
+    - ./nginx-web-server/pages:/usr/local/openresty/nginx/pages
+    - ./nginx-web-server/conf/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+    - ./nginx-web-server/jaeger-config.json:/usr/local/openresty/nginx/jaeger-config.json
+    - ./gen-lua:/gen-lua
+  post-storage-memcached:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: post-storage-memcached
+    image: memcached
+  post-storage-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: post-storage-mongodb
+    image: mongo
+  post-storage-service:
+    depends_on:
+    - post-storage-mongodb
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: PostStorageService
+    hostname: post-storage-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  social-graph-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: social-graph-mongodb
+    image: mongo
+  social-graph-redis:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: social-graph-redis
+    image: redis
+  social-graph-service:
+    depends_on:
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: SocialGraphService
+    hostname: social-graph-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  text-service:
+    depends_on:
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: TextService
+    hostname: text-service
+    image: yg397/social-network-microservices:root_cause
+  unique-id-service:
+    depends_on:
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: UniqueIdService
+    hostname: unique-id-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  url-shorten-memcached:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: url-shorten-memcached
+    image: memcached
+  url-shorten-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: url-shorten-mongodb
+    image: mongo
+  url-shorten-service:
+    depends_on:
+    - url-shorten-mongodb
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: UrlShortenService
+    hostname: url-shorten-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  user-memcached:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: user-memcached
+    image: memcached
+  user-mention-service:
+    depends_on:
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: UserMentionService
+    hostname: user-mention-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  user-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: user-mongodb
+    image: mongo
+  user-service:
+    depends_on:
+    - user-mongodb
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: UserService
+    hostname: user-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  user-timeline-mongodb:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: user-timeline-mongodb
+    image: mongo
+  user-timeline-redis:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    hostname: user-timeline-redis
+    image: redis
+  user-timeline-service:
+    depends_on:
+    - user-timeline-mongodb
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: UserTimelineService
+    hostname: user-timeline-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+  write-home-timeline-rabbitmq:
+    deploy:
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    environment:
+      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_ERLANG_COOKIE: WRITE-HOME-TIMELINE-RABBITMQ
+    hostname: write-home-timeline-rabbitmq
+    image: rabbitmq
+  write-home-timeline-service:
+    depends_on:
+    - write-home-timeline-rabbitmq
+    - jaeger
+    deploy:
+      replicas: 5
+      
+      resources:
+        limits:
+          cpus: '40'
+          memory: 128G
+    entrypoint: WriteHomeTimelineService
+    hostname: write-home-timeline-service
+    image: yg397/social-network-microservices:root_cause
+    volumes:
+    - ./config:/social-network-microservices/config
+version: '3.6'

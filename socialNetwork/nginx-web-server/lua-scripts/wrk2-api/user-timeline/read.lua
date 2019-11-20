@@ -46,7 +46,8 @@ function _M.ReadUserTimeline()
   local bridge_tracer = require "opentracing_bridge_tracer"
   local ngx = ngx
   local GenericObjectPool = require "GenericObjectPool"
-  local UserTimelineServiceClient = require "social_network_UserTimelineService"
+  local social_network_UserTimelineService = require "social_network_UserTimelineService"
+  local UserTimelineServiceClient = social_network_UserTimelineService.UserTimelineServiceClient
   local cjson = require "cjson"
   local liblualongnumber = require "liblualongnumber"
 
@@ -91,6 +92,8 @@ function _M.ReadUserTimeline()
     ngx.say(cjson.encode(user_timeline) )
 
   end
+  span:finish()
+  ngx.exit(ngx.HTTP_OK)
 end
 
 return _M

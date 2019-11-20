@@ -125,19 +125,22 @@ function _M.ComposePost()
     status, ret = pcall(compose_post_client.ComposePost, compose_post_client,
         req_id, post.username, tonumber(post.user_id), post.text,
        {}, {}, tonumber(post.post_type), carrier)
+      GenericObjectPool:returnConnection(client)
   end
+  GenericObjectPool:returnConnection(compose_post_client)
   if not status then
     ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
     if (ret.message) then
       ngx.say("compost_post failure: " .. ret.message)
       ngx.log(ngx.ERR, "compost_post failure: " .. ret.message)
     end
+    ngx.exit(ngx.status)
   end
 
   ngx.status = ngx.HTTP_OK
   ngx.say("Successfully upload post")
   span:finish()
-  ngx.exit(status)
+  ngx.exit(ngx.status)
 end
 
 return _M

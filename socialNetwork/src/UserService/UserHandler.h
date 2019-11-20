@@ -1001,7 +1001,7 @@ int GetMachineId (std::string *mac_hash) {
   }
 
   struct ifconf conf{};
-  char ifconfbuf[ 128 * sizeof(struct ifreq)  ];
+  char ifconfbuf[ 512 * sizeof(struct ifreq)  ];
   memset( ifconfbuf, 0, sizeof( ifconfbuf ));
   conf.ifc_buf = ifconfbuf;
   conf.ifc_len = sizeof( ifconfbuf );

@@ -38,9 +38,15 @@ int main(int argc, char *argv[]) {
   }
   int port = config_json["url-shorten-service"]["port"];
 
+  int mongodb_conns = config_json["url-shorten-mongodb"]["connections"];
+  int mongodb_timeout = config_json["url-shorten-mongodb"]["timeout_ms"];
+
+  int memcached_conns = config_json["url-shorten-memcached"]["connections"];
+  int memcached_timeout = config_json["url-shorten-memcached"]["timeout_ms"];
+
   memcached_client_pool =
-      init_memcached_client_pool(config_json, "url-shorten", 32, 128);
-  mongodb_client_pool = init_mongodb_client_pool(config_json, "url-shorten", 128);
+      init_memcached_client_pool(config_json, "url-shorten", 32, memcached_conns);
+  mongodb_client_pool = init_mongodb_client_pool(config_json, "url-shorten", mongodb_conns);
   if (memcached_client_pool == nullptr || mongodb_client_pool == nullptr) {
     return EXIT_FAILURE;
   }

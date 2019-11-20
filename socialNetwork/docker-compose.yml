@@ -17,19 +17,21 @@ services:
 #      - 10000:9090
     restart: always
     entrypoint: SocialGraphService
+    volumes:
+      - ./config:/social-network-microservices/config
 
   social-graph-mongodb:
     image: mongo
     hostname: social-graph-mongodb
-#    ports:
-#      - 27018:27017
+    ports:
+      - 27018:27017
     restart: always
 
   social-graph-redis:
     image: redis
     hostname: social-graph-redis
-#    ports:
-#      - 6380:6379
+    ports:
+      - 6380:6379
     restart: always
 
   write-home-timeline-service:
@@ -39,6 +41,8 @@ services:
     entrypoint: WriteHomeTimelineService
     depends_on:
       - write-home-timeline-rabbitmq
+    volumes:
+      - ./config:/social-network-microservices/config
 
   write-home-timeline-rabbitmq:
     image: rabbitmq
@@ -54,8 +58,8 @@ services:
   home-timeline-redis:
     image: redis
     hostname: home-timeline-redis
-#    ports:
-#      - 6381:6379
+    ports:
+      - 6381:6379
     restart: always
 
   compose-post-service:
@@ -67,13 +71,8 @@ services:
     entrypoint: ComposePostService
     depends_on:
       - write-home-timeline-rabbitmq
-
-  compose-post-redis:
-    image: redis
-    hostname: compose-post-redis
-#    ports:
-#      - 6382:6379
-    restart: always
+    volumes:
+      - ./config:/social-network-microservices/config
 
   post-storage-service:
     image: yg397/social-network-microservices:root_cause
@@ -82,6 +81,10 @@ services:
       - 10002:9090
     restart: always
     entrypoint: PostStorageService
+    depends_on:
+      - post-storage-mongodb
+    volumes:
+      - ./config:/social-network-microservices/config
 
   post-storage-memcached:
     image: memcached
@@ -93,8 +96,8 @@ services:
   post-storage-mongodb:
     image: mongo
     hostname: post-storage-mongodb
-#    ports:
-#      - 27019:27017
+    ports:
+      - 27019:27017
     restart: always
 
   user-timeline-service:
@@ -104,6 +107,10 @@ services:
 #      - 10003:9090
     restart: always
     entrypoint: UserTimelineService
+    depends_on:
+      - user-timeline-mongodb
+    volumes:
+      - ./config:/social-network-microservices/config
 
   user-timeline-redis:
     image: redis
@@ -115,8 +122,8 @@ services:
   user-timeline-mongodb:
     image: mongo
     hostname: user-timeline-mongodb
-#    ports:
-#      - 27020:27017
+    ports:
+      - 27020:27017
     restart: always
 
   url-shorten-service:
@@ -126,6 +133,10 @@ services:
 #      - 10004:9090
     restart: always
     entrypoint: UrlShortenService
+    depends_on:
+      - url-shorten-mongodb
+    volumes:
+      - ./config:/social-network-microservices/config
 
   url-shorten-memcached:
     image: memcached
@@ -148,6 +159,10 @@ services:
 #      - 10005:9090
     restart: always
     entrypoint: UserService
+    depends_on:
+      - user-mongodb
+    volumes:
+      - ./config:/social-network-microservices/config
 
   user-memcached:
     image: memcached
@@ -159,8 +174,8 @@ services:
   user-mongodb:
     image: mongo
     hostname: user-mongodb
-#    ports:
-#      - 27023:27017
+    ports:
+      - 27023:27017
     restart: always
 
   media-service:
@@ -170,6 +185,10 @@ services:
 #      - 10006:9090
     restart: always
     entrypoint: MediaService
+    depends_on:
+      - media-mongodb
+    volumes:
+      - ./config:/social-network-microservices/config
 
   media-memcached:
     image: memcached
@@ -200,6 +219,8 @@ services:
 #      - 10008:9090
     restart: always
     entrypoint: UniqueIdService
+    volumes:
+      - ./config:/social-network-microservices/config
 
   user-mention-service:
     image: yg397/social-network-microservices:root_cause
@@ -208,6 +229,8 @@ services:
 #      - 10009:9090
     restart: always
     entrypoint: UserMentionService
+    volumes:
+      - ./config:/social-network-microservices/config
 
   home-timeline-service:
     image: yg397/social-network-microservices:root_cause
@@ -216,12 +239,14 @@ services:
 #      - 10010:9090
     restart: always
     entrypoint: HomeTimelineService
+    volumes:
+      - ./config:/social-network-microservices/config
 
-  nginx-thrift:
+  nginx-web-server:
     image: yg397/openresty-thrift:xenial
-    hostname: nginx-thrift
+    hostname: nginx-web-server
     ports:
-      - 8080:8080
+      - 8090:8080
     restart: always
     volumes:
       - ./nginx-web-server/lua-scripts:/usr/local/openresty/nginx/lua-scripts
@@ -234,7 +259,7 @@ services:
     image: yg397/media-frontend:xenial
     hostname: media-frontend
     ports:
-      - 8081:8080
+      - 8091:8080
     restart: always
     volumes:
       - ./media-frontend/lua-scripts:/usr/local/openresty/nginx/lua-scripts

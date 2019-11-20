@@ -16,8 +16,6 @@
 #include "../../gen-cpp/social_network_types.h"
 #include "../../gen-cpp/SocialGraphService.h"
 
-#define NUM_WORKERS 4
-
 using namespace social_network;
 
 static std::exception_ptr _teptr;
@@ -161,6 +159,7 @@ int main(int argc, char *argv[]) {
   }
 
   int port = config_json["write-home-timeline-service"]["port"];
+  int n_workers = config_json["write-home-timeline-service"]["workers"];
 
   std::string rabbitmq_addr =
       config_json["write-home-timeline-rabbitmq"]["addr"];
@@ -169,23 +168,27 @@ int main(int argc, char *argv[]) {
   std::string redis_addr =
       config_json["home-timeline-redis"]["addr"];
   int redis_port = config_json["home-timeline-redis"]["port"];
+  int redis_conns = config_json["home-timeline-redis"]["connections"];
+  int redis_timeout = config_json["home-timeline-redis"]["timeout_ms"];
 
   std::string social_graph_service_addr =
       config_json["social-graph-service"]["addr"];
   int social_graph_service_port = config_json["social-graph-service"]["port"];
+  int social_graph_service_conns = config_json["social-graph-service"]["connections"];
+  int social_graph_service_timeout = config_json["social-graph-service"]["timeout_ms"];
 
   ClientPool<RedisClient> redis_client_pool("redis", redis_addr, redis_port,
-                                            0, 128, 1000);
+                                            0, redis_conns, redis_timeout);
 
   ClientPool<ThriftClient<SocialGraphServiceClient>>
       social_graph_client_pool(
           "social-graph-service", social_graph_service_addr,
-          social_graph_service_port, 0, 128, 1000);
+          social_graph_service_port, 0, social_graph_service_conns, social_graph_service_timeout);
 
   _redis_client_pool = &redis_client_pool;
   _social_graph_client_pool = &social_graph_client_pool;
 
-  std::unique_ptr<std::thread> threads_ptr[NUM_WORKERS];
+  std::unique_ptr<std::thread> threads_ptr[n_workers];
   for (auto & thread_ptr : threads_ptr) {
     thread_ptr = std::make_unique<std::thread>(
         WorkerThread, std::ref(rabbitmq_addr), rabbitmq_port);
