@@ -125,7 +125,7 @@ void TextHandler::ComposeText(
         auto user_mention_client = user_mention_client_wrapper->GetClient();
         try {
           user_mention_client->ComposeUserMentions(_return_user_mentions, req_id, mention_usernames,
-                                                  writer_text_map);
+                                                  user_mention_writer_text_map);
         } catch (...) {
           LOG(error) << "Failed to upload user_mentions to user-mention-service";
           _user_mention_client_pool->Push(user_mention_client_wrapper);

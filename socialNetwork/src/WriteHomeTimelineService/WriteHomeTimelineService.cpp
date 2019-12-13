@@ -43,9 +43,7 @@ void OnReceivedWorker(const AMQP::Message &msg) {
     auto span = opentracing::Tracer::Global()->StartSpan(
         "write_home_timeline_server",
         {opentracing::ChildOf(parent_span->get())});
-    std::map<std::string, std::string> writer_text_map;
-    TextMapWriter writer(writer_text_map);
-    opentracing::Tracer::Global()->Inject(span->context(), writer);
+    
 
     // Extract information from rabbitmq messages
     int64_t user_id = msg_json["user_id"];
@@ -55,6 +53,12 @@ void OnReceivedWorker(const AMQP::Message &msg) {
     std::vector<int64_t> user_mentions_id = msg_json["user_mentions_id"];
 
     // Find followers of the user
+    auto followers_span = opentracing::Tracer::Global()->StartSpan(
+        "find_followers_client", {opentracing::ChildOf(&span->context())});
+    std::map<std::string, std::string> writer_text_map;
+    TextMapWriter writer(writer_text_map);
+    opentracing::Tracer::Global()->Inject(followers_span->context(), writer);
+
     auto social_graph_client_wrapper = _social_graph_client_pool->Pop();
     if (!social_graph_client_wrapper) {
       ServiceException se;
@@ -73,14 +77,16 @@ void OnReceivedWorker(const AMQP::Message &msg) {
       throw;
     }
     _social_graph_client_pool->Push(social_graph_client_wrapper);
+    followers_span->Finish();
 
     std::set<int64_t> followers_id_set(followers_id.begin(),
         followers_id.end());
     followers_id_set.insert(user_mentions_id.begin(), user_mentions_id.end());
 
+
     // Update Redis ZSet
     auto redis_span = opentracing::Tracer::Global()->StartSpan(
-        "redis_update_client", {opentracing::ChildOf(&span->context())});
+        "write_home_timeline_redis_update_client", {opentracing::ChildOf(&span->context())});
     auto redis_client_wrapper = _redis_client_pool->Pop();
     if (!redis_client_wrapper) {
       ServiceException se;

@@ -214,7 +214,7 @@ void UserHandler::RegisterUserWithId(
 
     bson_error_t error;
     auto user_insert_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_insert_cilent", { opentracing::ChildOf(&span->context()) });
+        "user_mongo_insert_cilent", { opentracing::ChildOf(&span->context()) });
     if (!mongoc_collection_insert_one(
         collection, new_doc, nullptr, nullptr, &error)) {
       LOG(error) << "Failed to insert user " << username
@@ -363,7 +363,7 @@ void UserHandler::RegisterUser(
     BSON_APPEND_UTF8(new_doc, "password", password_hashed.c_str());
     
     auto user_insert_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_insert_client", { opentracing::ChildOf(&span->context()) });
+        "user_mongo_insert_client", { opentracing::ChildOf(&span->context()) });
     if (!mongoc_collection_insert_one(
         collection, new_doc, nullptr, nullptr, &error)) {
       LOG(error) << "Failed to insert user " << username
@@ -435,7 +435,7 @@ void UserHandler::ComposeCreatorWithUsername(
   char *user_id_mmc;
   if (memcached_client) {
     auto id_get_span = opentracing::Tracer::Global()->StartSpan(
-        "mmc_get_client", { opentracing::ChildOf(&span->context()) });
+        "user_mmc_get_client", { opentracing::ChildOf(&span->context()) });
     user_id_mmc = memcached_get(
         memcached_client,
         (username+":user_id").c_str(),
@@ -488,7 +488,7 @@ void UserHandler::ComposeCreatorWithUsername(
     BSON_APPEND_UTF8(query, "username", username.c_str());
 
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "MongoFindUser", { opentracing::ChildOf(&span->context()) });
+        "user_mongo_find_client", { opentracing::ChildOf(&span->context()) });
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -555,7 +555,7 @@ void UserHandler::ComposeCreatorWithUsername(
   if (memcached_client) {
     if (user_id != -1 && !cached) {
       auto id_set_span = opentracing::Tracer::Global()->StartSpan(
-          "mmc_set_cilent", { opentracing::ChildOf(&span->context()) });
+          "user_mmc_set_cilent", { opentracing::ChildOf(&span->context()) });
       std::string user_id_str = std::to_string(user_id);
       memcached_rc = memcached_set(
           memcached_client,
@@ -635,7 +635,7 @@ void UserHandler::Login(
     LOG(warning) << "Failed to pop a client from memcached pool";
   } else {
     auto get_login_span = opentracing::Tracer::Global()->StartSpan(
-        "mmc_get_client", { opentracing::ChildOf(&span->context()) });
+        "user_mmc_get_client", { opentracing::ChildOf(&span->context()) });
     login_mmc = memcached_get(
         memcached_client,
         (username + ":login").c_str(),
@@ -692,7 +692,7 @@ void UserHandler::Login(
     BSON_APPEND_UTF8(query, "username", username.c_str());
 
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", {opentracing::ChildOf(&span->context())});
+        "user_mongo_find_client", {opentracing::ChildOf(&span->context())});
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -795,7 +795,7 @@ void UserHandler::Login(
       LOG(warning) << "Failed to pop a client from memcached pool";
     } else {
       auto set_login_span = opentracing::Tracer::Global()->StartSpan(
-          "mmc_set_client", { opentracing::ChildOf(&span->context()) });
+          "user_mmc_set_client", { opentracing::ChildOf(&span->context()) });
       std::string login_str = login_json.dump();
       memcached_rc = memcached_set(
           memcached_client,
@@ -840,7 +840,7 @@ int64_t UserHandler::GetUserId(
   char *user_id_mmc;
   if (memcached_client) {
     auto id_get_span = opentracing::Tracer::Global()->StartSpan(
-        "mmc_get_user_id_client", { opentracing::ChildOf(&span->context()) });
+        "user_mmc_get_user_id_client", { opentracing::ChildOf(&span->context()) });
     user_id_mmc = memcached_get(
         memcached_client,
         (username+":user_id").c_str(),
@@ -891,7 +891,7 @@ int64_t UserHandler::GetUserId(
     BSON_APPEND_UTF8(query, "username", username.c_str());
 
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", { opentracing::ChildOf(&span->context()) });
+        "user_mongo_find_client", { opentracing::ChildOf(&span->context()) });
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -953,7 +953,7 @@ int64_t UserHandler::GetUserId(
     } else {
       std::string user_id_str = std::to_string(user_id);
       auto set_login_span = opentracing::Tracer::Global()->StartSpan(
-          "mmc_set_client", { opentracing::ChildOf(&span->context()) });
+          "user_mmc_set_client", { opentracing::ChildOf(&span->context()) });
       memcached_rc = memcached_set(
           memcached_client,
           (username+":user_id").c_str(),

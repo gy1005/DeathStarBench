@@ -110,7 +110,7 @@ void UrlShortenHandler::ComposeUrls(
           }
 
           auto mongo_span = opentracing::Tracer::Global()->StartSpan(
-              "mongo_insert_client",
+              "url_mongo_insert_client",
               { opentracing::ChildOf(&span->context()) });
 
           mongoc_bulk_operation_t *bulk;

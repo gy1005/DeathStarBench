@@ -190,7 +190,7 @@ void SocialGraphHandler::Follow(
         );
         bson_error_t error;
         auto update_span = opentracing::Tracer::Global()->StartSpan(
-            "mongo_update_client", {opentracing::ChildOf(&span->context())});
+            "social_graph_mongo_update_client", {opentracing::ChildOf(&span->context())});
         bson_t reply;
         bool updated = mongoc_collection_find_and_modify(
             collection, search_not_exist, nullptr, update, nullptr, false,
@@ -228,7 +228,7 @@ void SocialGraphHandler::Follow(
         auto redis_client = redis_client_wrapper->GetClient();
 
         auto redis_span = opentracing::Tracer::Global()->StartSpan(
-            "redis_update_client", {opentracing::ChildOf(&span->context())});
+            "social_graph_redis_update_client", {opentracing::ChildOf(&span->context())});
         auto num_followee = redis_client->zcard(
             std::to_string(user_id) + ":followees");
         auto num_follower = redis_client->zcard(
@@ -311,7 +311,7 @@ void SocialGraphHandler::Unfollow(
         bson_t reply;
         bson_error_t error;
         auto update_span = opentracing::Tracer::Global()->StartSpan(
-            "mongo_delete_client", {opentracing::ChildOf(&span->context())});
+            "social_graph_mongo_delete_client", {opentracing::ChildOf(&span->context())});
         bool updated = mongoc_collection_find_and_modify(
             collection, query, nullptr, update, nullptr, false, false,
             true, &reply, &error);
@@ -366,7 +366,7 @@ void SocialGraphHandler::Unfollow(
         bson_t reply;
         bson_error_t error;
         auto update_span = opentracing::Tracer::Global()->StartSpan(
-            "mongo_delete_client", {opentracing::ChildOf(&span->context())});
+            "social_graph_mongo_delete_client", {opentracing::ChildOf(&span->context())});
         bool updated = mongoc_collection_find_and_modify(
             collection, query, nullptr, update, nullptr, false, false,
             true, &reply, &error);
@@ -403,7 +403,7 @@ void SocialGraphHandler::Unfollow(
         auto redis_client = redis_client_wrapper->GetClient();
 
         auto redis_span = opentracing::Tracer::Global()->StartSpan(
-            "redis_update_client", {opentracing::ChildOf(&span->context())});
+            "social_graph_redis_update_client", {opentracing::ChildOf(&span->context())});
         auto num_followee = redis_client->zcard(
             std::to_string(user_id) + ":followees");
         auto num_follower = redis_client->zcard(
@@ -463,7 +463,7 @@ void SocialGraphHandler::GetFollowers(
   auto redis_client = redis_client_wrapper->GetClient();
 
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "redis_get_client", {opentracing::ChildOf(&span->context())});
+      "social_graph_redis_get_client", {opentracing::ChildOf(&span->context())});
   auto num_follower = redis_client->zcard(
       std::to_string(user_id) + ":followers");
   redis_client->sync_commit();
@@ -512,7 +512,7 @@ void SocialGraphHandler::GetFollowers(
     bson_t *query = bson_new();
     BSON_APPEND_INT64(query, "user_id", user_id);
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", {opentracing::ChildOf(&span->context())});
+        "social_graph_mongo_find_client", {opentracing::ChildOf(&span->context())});
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -557,7 +557,7 @@ void SocialGraphHandler::GetFollowers(
       redis_client_wrapper = _redis_client_pool->Pop();
       redis_client = redis_client_wrapper->GetClient();
       auto redis_insert_span = opentracing::Tracer::Global()->StartSpan(
-          "redis_insert_client", {opentracing::ChildOf(&span->context())});
+          "social_graph_redis_insert_client", {opentracing::ChildOf(&span->context())});
       std::string key = std::to_string(user_id) + ":followers";
       std::vector<std::string> options{"NX"};
       redis_client->zadd(key, options, redis_zset);
@@ -599,7 +599,7 @@ void SocialGraphHandler::GetFollowees(
   auto redis_client = redis_client_wrapper->GetClient();
 
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "redis_get_client", {opentracing::ChildOf(&span->context())});
+      "social_graph_redis_get_client", {opentracing::ChildOf(&span->context())});
   auto num_followees = redis_client->zcard(
       std::to_string(user_id) + ":followees");
   redis_client->sync_commit();
@@ -647,7 +647,7 @@ void SocialGraphHandler::GetFollowees(
     bson_t *query = bson_new();
     BSON_APPEND_INT64(query, "user_id", user_id);
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", {opentracing::ChildOf(&span->context())});
+        "social_graph_mongo_find_client", {opentracing::ChildOf(&span->context())});
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -751,7 +751,7 @@ void SocialGraphHandler::InsertUser(
   );
   bson_error_t error;
   auto insert_span = opentracing::Tracer::Global()->StartSpan(
-      "mongo_insert_client", {opentracing::ChildOf(&span->context())});
+      "social_graph_mongo_insert_client", {opentracing::ChildOf(&span->context())});
   bool inserted = mongoc_collection_insert_one(
       collection, new_doc, nullptr, nullptr, &error);
   insert_span->Finish();

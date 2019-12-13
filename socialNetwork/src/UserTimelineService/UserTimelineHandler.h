@@ -98,7 +98,7 @@ void UserTimelineHandler::WriteUserTimeline(
   bson_error_t error;
   bson_t reply;
   auto update_span = opentracing::Tracer::Global()->StartSpan(
-      "mongo_insert_client", {opentracing::ChildOf(&span->context())});
+      "user_timeline_mongo_insert_client", {opentracing::ChildOf(&span->context())});
   bool updated = mongoc_collection_find_and_modify(
       collection, query, nullptr, update, nullptr, false, true,
       true, &reply, &error);
@@ -132,7 +132,7 @@ void UserTimelineHandler::WriteUserTimeline(
   }
   auto redis_client = redis_client_wrapper->GetClient();
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "redis_update_client", {opentracing::ChildOf(&span->context())});
+      "user_timeline_redis_update_client", {opentracing::ChildOf(&span->context())});
   auto num_posts = redis_client->zcard(std::to_string(user_id));
   redis_client->sync_commit();
   auto num_posts_reply = num_posts.get();
@@ -181,7 +181,7 @@ void UserTimelineHandler::ReadUserTimeline(
   }
   auto redis_client = redis_client_wrapper->GetClient();
   auto redis_span = opentracing::Tracer::Global()->StartSpan(
-      "redis_find_client", {opentracing::ChildOf(&span->context())});
+      "user_timeline_redis_find_client", {opentracing::ChildOf(&span->context())});
   auto post_ids_future = redis_client->zrevrange(
       std::to_string(user_id), start, stop - 1);
   redis_client->commit();
@@ -235,7 +235,7 @@ void UserTimelineHandler::ReadUserTimeline(
         "}");
 
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", { opentracing::ChildOf(&span->context()) });
+        "user_timeline_mongo_find_client", { opentracing::ChildOf(&span->context()) });
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, opts, nullptr);
     find_span->Finish();
@@ -311,7 +311,7 @@ void UserTimelineHandler::ReadUserTimeline(
     }
     redis_client = redis_client_wrapper->GetClient();
     auto redis_update_span = opentracing::Tracer::Global()->StartSpan(
-        "redis_update_client", {opentracing::ChildOf(&span->context())});
+        "user_timeline_redis_update_client", {opentracing::ChildOf(&span->context())});
     std::string user_id_str = std::to_string(user_id);
     redis_client->del(std::vector<std::string>{user_id_str});
     std::vector<std::string> options{"NX"};

@@ -5,5 +5,5 @@ reporter:
   queueSize: 10000
   bufferFlushInterval: 1
 sampler:
-  type: const
+  type: "probabilistic"
   param: 0.2

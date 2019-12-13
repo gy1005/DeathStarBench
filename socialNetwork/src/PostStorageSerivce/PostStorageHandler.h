@@ -140,7 +140,7 @@ void PostStorageHandler::StorePost(
 
   bson_error_t error;
   auto insert_span = opentracing::Tracer::Global()->StartSpan(
-      "mongo_insert_client", { opentracing::ChildOf(&span->context()) });
+      "post_storage_mongo_insert_client", { opentracing::ChildOf(&span->context()) });
   bool inserted = mongoc_collection_insert_one (
       collection, new_doc, nullptr, nullptr, &error);
   insert_span->Finish();
@@ -196,7 +196,7 @@ void PostStorageHandler::ReadPost(
   size_t post_mmc_size;
   uint32_t memcached_flags;
   auto get_span = opentracing::Tracer::Global()->StartSpan(
-      "mmc_get_client", { opentracing::ChildOf(&span->context()) });
+      "post_storage_mmc_get_client", { opentracing::ChildOf(&span->context()) });
   char *post_mmc = memcached_get(
       memcached_client,
       post_id_str.c_str(),
@@ -267,7 +267,7 @@ void PostStorageHandler::ReadPost(
     bson_t *query = bson_new();
     BSON_APPEND_INT64(query, "post_id", post_id);
     auto find_span = opentracing::Tracer::Global()->StartSpan(
-        "mongo_find_client", { opentracing::ChildOf(&span->context()) });
+        "post_storage_mongo_find_client", { opentracing::ChildOf(&span->context()) });
     mongoc_cursor_t *cursor = mongoc_collection_find_with_opts(
         collection, query, nullptr, nullptr);
     const bson_t *doc;
@@ -342,7 +342,7 @@ void PostStorageHandler::ReadPost(
         throw se;
       }
       auto set_span = opentracing::Tracer::Global()->StartSpan(
-          "mmc_set_client", { opentracing::ChildOf(&span->context()) });
+          "post_storage_mmc_set_client", { opentracing::ChildOf(&span->context()) });
 
       memcached_rc = memcached_set(
           memcached_client,
@@ -377,7 +377,7 @@ void PostStorageHandler::ReadPosts(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "read_posts_server",
+      "post_storage_read_posts_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 
@@ -432,7 +432,7 @@ void PostStorageHandler::ReadPosts(
   size_t return_value_length;
   uint32_t flags;
   auto get_span = opentracing::Tracer::Global()->StartSpan(
-      "mmc_mget_client", { opentracing::ChildOf(&span->context()) });
+      "post_storage_mmc_mget_client", { opentracing::ChildOf(&span->context()) });
 
   while (true) {
     return_value = memcached_fetch(memcached_client, return_key, &return_key_length,

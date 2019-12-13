@@ -4,8 +4,7 @@ services:
     - write-home-timeline-rabbitmq
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -28,8 +27,7 @@ services:
     depends_on:
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -41,22 +39,21 @@ services:
     - ./config:/social-network-microservices/config
   jaeger:
     deploy:
-      
       resources:
         limits:
           cpus: '40'
           memory: 128G
     environment:
-    - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
     hostname: jaeger
     image: jaegertracing/all-in-one:latest
     ports:
     - 16686:16686
+    - 9411:9411
   media-frontend:
     depends_on:
     - jaeger
     deploy:
-      
       resources:
         limits:
           cpus: '40'
@@ -91,8 +88,7 @@ services:
     - media-mongodb
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -144,8 +140,7 @@ services:
     - post-storage-mongodb
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -157,7 +152,7 @@ services:
     - ./config:/social-network-microservices/config
   social-graph-mongodb:
     deploy:
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -166,7 +161,7 @@ services:
     image: mongo
   social-graph-redis:
     deploy:
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -177,8 +172,7 @@ services:
     depends_on:
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -192,8 +186,7 @@ services:
     depends_on:
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -205,8 +198,7 @@ services:
     depends_on:
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -239,8 +231,7 @@ services:
     - url-shorten-mongodb
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -263,8 +254,7 @@ services:
     depends_on:
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -288,8 +278,7 @@ services:
     - user-mongodb
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -322,8 +311,7 @@ services:
     - user-timeline-mongodb
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
@@ -350,8 +338,7 @@ services:
     - write-home-timeline-rabbitmq
     - jaeger
     deploy:
-      replicas: 5
-      
+      replicas: 1
       resources:
         limits:
           cpus: '40'
