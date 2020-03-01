@@ -1,6 +1,17 @@
 import aiohttp
 import asyncio
 import sys
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--ip_addr', dest='ip_addr', type=str, default="nginx-web-server")
+parser.add_argument('--port', dest='port', type=int, default=8090)
+parser.add_argument('--data_path', dest='data_path', type=str, default="datasets/social-graph/socfb-Reed98/socfb-Reed98.mtx")
+
+args = parser.parse_args()
+ip_addr = args.ip_addr
+port = args.port
+data_path = args.data_path
 
 async def upload_follow(session, addr, user_0, user_1):
   payload = {'user_name': 'username_' + user_0, 'followee_name': 'username_' + user_1}
@@ -60,15 +71,11 @@ async def follow(addr, edges):
     print(idx, "edges finished")
 
 if __name__ == '__main__':
-  if len(sys.argv) < 2:
-    filename = "datasets/social-graph/socfb-Reed98/socfb-Reed98.mtx"
-  else:
-    filename = sys.argv[1]
-  with open(filename, 'r') as file:
+  with open(data_path, 'r') as file:
     nodes = getNodes(file)
     edges = getEdges(file)
 
-  addr = "http://127.0.0.1:8090"
+  addr = "http://" + ip_addr + ":" + str(port)
   loop = asyncio.get_event_loop()
   future = asyncio.ensure_future(register(addr, nodes))
   loop.run_until_complete(future)

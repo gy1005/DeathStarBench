@@ -54,7 +54,7 @@ void RedisClient::Connect() {
         LOG(error) << "Failed to connect " << host << ":" << port;
         throw status;
       }
-    });
+    }, 60000, 16, 100);
   }
 }
 

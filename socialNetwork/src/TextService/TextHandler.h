@@ -97,7 +97,7 @@ void TextHandler::ComposeText(
           url_client->ComposeUrls(_return_urls, req_id, urls, url_writer_text_map);
         } catch (...) {
           LOG(error) << "Failed to upload urls to url-shorten-service";
-          _url_client_pool->Push(url_client_wrapper);
+          _url_client_pool->Remove(url_client_wrapper);
           throw;
         }
         _url_client_pool->Push(url_client_wrapper);
@@ -128,7 +128,7 @@ void TextHandler::ComposeText(
                                                   user_mention_writer_text_map);
         } catch (...) {
           LOG(error) << "Failed to upload user_mentions to user-mention-service";
-          _user_mention_client_pool->Push(user_mention_client_wrapper);
+          _user_mention_client_pool->Remove(user_mention_client_wrapper);
           throw;
         }
 

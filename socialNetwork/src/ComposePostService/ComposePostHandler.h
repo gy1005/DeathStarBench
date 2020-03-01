@@ -143,7 +143,7 @@ Creator ComposePostHandler::_ComposeCreaterHelper(
     user_client->ComposeCreatorWithUserId(_return_creator, req_id, user_id, username, writer_text_map);
   } catch (...) {
     LOG(error) << "Failed to send compose-creator to user-service";
-    _user_service_client_pool->Push(user_client_wrapper);
+    _user_service_client_pool->Remove(user_client_wrapper);
     span->Finish();
     throw;
   }
@@ -179,7 +179,7 @@ TextServiceReturn ComposePostHandler::_ComposeTextHelper(
     text_client->ComposeText(_return_text, req_id, text, writer_text_map);
   } catch (...) {
     LOG(error) << "Failed to send compose-text to text-service";
-    _text_service_client_pool->Push(text_client_wrapper);
+    _text_service_client_pool->Remove(text_client_wrapper);
     span->Finish();
     throw;
   }
@@ -215,7 +215,7 @@ std::vector<Media> ComposePostHandler::_ComposeMediaHelper(
     media_client->ComposeMedia(_return_media, req_id, media_types, media_ids, writer_text_map);
   } catch (...) {
     LOG(error) << "Failed to send compose-media to media-service";
-    _media_service_client_pool->Push(media_client_wrapper);
+    _media_service_client_pool->Remove(media_client_wrapper);
     span->Finish();
     throw;
   }
@@ -250,7 +250,7 @@ int64_t ComposePostHandler::_ComposeUniqueIdHelper(
     _return_unique_id = unique_id_client->ComposeUniqueId(req_id, post_type, writer_text_map);
   } catch (...) {
     LOG(error) << "Failed to send compose-unique_id to unique_id-service";
-    _unique_id_service_client_pool->Push(unique_id_client_wrapper);
+    _unique_id_service_client_pool->Remove(unique_id_client_wrapper);
     span->Finish();
     throw;
   }
@@ -286,7 +286,7 @@ void ComposePostHandler::_UploadPostHelper(
       post_storage_client->StorePost(req_id, post, writer_text_map);
     }
     catch (...) {
-      _post_storage_client_pool->Push(post_storage_client_wrapper);
+      _post_storage_client_pool->Remove(post_storage_client_wrapper);
       LOG(error) << "Failed to store post to post-storage-service";
       throw;
     }
@@ -329,7 +329,7 @@ void ComposePostHandler::_UploadUserTimelineHelper(
                                               timestamp, writer_text_map);
     }
     catch (...) {
-      _user_timeline_client_pool->Push(user_timeline_client_wrapper);
+      _user_timeline_client_pool->Remove(user_timeline_client_wrapper);
       throw;
     }
     _user_timeline_client_pool->Push(user_timeline_client_wrapper);

@@ -100,7 +100,7 @@ void ReadHomeTimelineHandler::ReadHomeTimeline(
   try {
     post_client->ReadPosts(_return, req_id, post_ids, writer_text_map);
   } catch (...) {
-    _post_client_pool->Push(post_client_wrapper);
+    _post_client_pool->Remove(post_client_wrapper);
     LOG(error) << "Failed to read posts from post-storage-service";
     throw;
   }

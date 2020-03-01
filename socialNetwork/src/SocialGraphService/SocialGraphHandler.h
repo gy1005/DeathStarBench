@@ -486,7 +486,7 @@ void SocialGraphHandler::GetFollowers(
       ServiceException se;
       se.message = "Failed to get followers from Redis";
       se.errorCode = ErrorCode::SE_REDIS_ERROR;
-      _redis_client_pool->Push(redis_client_wrapper);
+      _redis_client_pool->Remove(redis_client_wrapper);
       throw se;
     }
   } else {
@@ -622,7 +622,7 @@ void SocialGraphHandler::GetFollowees(
       ServiceException se;
       se.message = "Failed to get followees from Redis";
       se.errorCode = ErrorCode::SE_REDIS_ERROR;
-      _redis_client_pool->Push(redis_client_wrapper);
+      _redis_client_pool->Remove(redis_client_wrapper);
       throw se;
     }
   } else {
@@ -802,7 +802,7 @@ void SocialGraphHandler::FollowWithUsername(
         try {
           _return = user_client->GetUserId(req_id, user_name, writer_text_map);
         } catch (...) {
-          _user_service_client_pool->Push(user_client_wrapper);
+          _user_service_client_pool->Remove(user_client_wrapper);
           LOG(error) << "Failed to get user_id from user-service";
           throw;
         }        
@@ -824,7 +824,7 @@ void SocialGraphHandler::FollowWithUsername(
         try {
           _return = user_client->GetUserId(req_id, followee_name, writer_text_map);
         } catch (...) {
-          _user_service_client_pool->Push(user_client_wrapper);
+          _user_service_client_pool->Remove(user_client_wrapper);
           LOG(error) << "Failed to get user_id from user-service";
           throw;
         }
