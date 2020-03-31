@@ -422,7 +422,7 @@ void UserHandler::ComposeCreatorWithUsername(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "compose_creator_with_username_server",
+      "compose_creator_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 
@@ -593,7 +593,7 @@ void UserHandler::ComposeCreatorWithUserId(
   TextMapWriter writer(writer_text_map);
   auto parent_span = opentracing::Tracer::Global()->Extract(reader);
   auto span = opentracing::Tracer::Global()->StartSpan(
-      "compose_creator_with_userid_server",
+      "compose_creator_server",
       { opentracing::ChildOf(parent_span->get()) });
   opentracing::Tracer::Global()->Inject(span->context(), writer);
 

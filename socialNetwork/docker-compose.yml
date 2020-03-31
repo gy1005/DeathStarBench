@@ -21,17 +21,17 @@ services:
       - ./config:/social-network-microservices/config
 
   social-graph-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: social-graph-mongodb
-    ports:
-      - 27018:27017
+    # ports:
+    #   - 27018:27017
     restart: always
 
   social-graph-redis:
-    image: redis
+    image: yg397/redis:netem
     hostname: social-graph-redis
-    ports:
-      - 6380:6379
+    # ports:
+    #   - 6380:6379
     restart: always
 
   write-home-timeline-service:
@@ -56,10 +56,10 @@ services:
     restart: always
 
   home-timeline-redis:
-    image: redis
+    image: yg397/redis:netem
     hostname: home-timeline-redis
-    ports:
-      - 6381:6379
+    # ports:
+    #   - 6381:6379
     restart: always
 
   compose-post-service:
@@ -77,8 +77,8 @@ services:
   post-storage-service:
     image: yg397/social-network-microservices:root_cause
     hostname: post-storage-service
-    ports:
-      - 10002:9090
+    # ports:
+    #   - 10002:9090
     restart: always
     entrypoint: PostStorageService
     depends_on:
@@ -87,17 +87,17 @@ services:
       - ./config:/social-network-microservices/config
 
   post-storage-memcached:
-    image: memcached
+    image: yg397/memcached:netem
     hostname: post-storage-memcached
 #    ports:
 #      - 11212:11211
     restart: always
 
   post-storage-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: post-storage-mongodb
-    ports:
-      - 27019:27017
+    # ports:
+    #   - 27019:27017
     restart: always
 
   user-timeline-service:
@@ -113,17 +113,17 @@ services:
       - ./config:/social-network-microservices/config
 
   user-timeline-redis:
-    image: redis
+    image: yg397/redis:netem
     hostname: user-timeline-redis
 #    ports:
 #      - 6383:6379
     restart: always
 
   user-timeline-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: user-timeline-mongodb
-    ports:
-      - 27020:27017
+    # ports:
+    #   - 27020:27017
     restart: always
 
   url-shorten-service:
@@ -139,14 +139,14 @@ services:
       - ./config:/social-network-microservices/config
 
   url-shorten-memcached:
-    image: memcached
+    image: yg397/memcached:netem
     hostname: url-shorten-memcached
 #    ports:
 #      - 11213:11211
     restart: always
 
   url-shorten-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: url-shorten-mongodb
 #    ports:
 #      - 27021:27017
@@ -165,17 +165,17 @@ services:
       - ./config:/social-network-microservices/config
 
   user-memcached:
-    image: memcached
+    image: yg397/memcached:netem
     hostname: user-memcached
 #    ports:
 #      - 11214:11211
     restart: always
 
   user-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: user-mongodb
-    ports:
-      - 27023:27017
+    # ports:
+    #   - 27023:27017
     restart: always
 
   media-service:
@@ -191,14 +191,14 @@ services:
       - ./config:/social-network-microservices/config
 
   media-memcached:
-    image: memcached
+    image: yg397/memcached:netem
     hostname: media-memcached
 #    ports:
 #      - 11215:11211
     restart: always
 
   media-mongodb:
-    image: mongo
+    image: yg397/mongo:netem
     hostname: media-mongodb
 #    ports:
 #      - 27024:27017
@@ -246,7 +246,7 @@ services:
     image: yg397/openresty-thrift:xenial
     hostname: nginx-web-server
     ports:
-      - 8090:8080
+      - 38100:8080
     restart: always
     volumes:
       - ./nginx-web-server/lua-scripts:/usr/local/openresty/nginx/lua-scripts
@@ -259,7 +259,7 @@ services:
     image: yg397/media-frontend:xenial
     hostname: media-frontend
     ports:
-      - 8091:8080
+      - 38101:8080
     restart: always
     volumes:
       - ./media-frontend/lua-scripts:/usr/local/openresty/nginx/lua-scripts
@@ -273,7 +273,7 @@ services:
 #      - 6831:6831/udp
 #      - 6832:6832/udp
 #      - 5778:5778
-      - 26686:16686
+      - 36600:16686
 #      - 14268:14268
 #      - 9411:9411
     restart: always

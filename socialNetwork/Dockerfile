@@ -9,6 +9,13 @@ RUN cd /social-network-microservices \
     && cd build \
     && cmake .. \
     && make -j${NUM_CPUS} \
+    && make install \
+    && cd ../tcp_latency \
+    && mkdir -p build \
+    && cd build \
+    && cmake .. \
+    && make -j${NUM_CPUS} \
     && make install
+
 
 WORKDIR /social-network-microservices

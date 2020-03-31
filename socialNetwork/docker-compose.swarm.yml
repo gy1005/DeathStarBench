@@ -12,8 +12,8 @@ services:
           - node.labels.type == compose-post-service
       resources:
         limits:
-          cpus: '4'
-          memory: 4G
+          cpus: '6'
+          memory: 6G
     entrypoint: ComposePostService
     hostname: compose-post-service
     image: yg397/social-network-microservices:root_cause
@@ -31,7 +31,7 @@ services:
           cpus: '4'
           memory: 16G
     hostname: home-timeline-redis
-    image: redis
+    image: yg397/redis:netem
 
   home-timeline-service:
     depends_on:
@@ -100,7 +100,7 @@ services:
           cpus: '1'
           memory: 1G
     hostname: media-memcached
-    image: memcached
+    image: yg397/memcached:netem
 
   media-mongodb:
     deploy:
@@ -113,7 +113,7 @@ services:
           cpus: '1'
           memory: 2G
     hostname: media-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   media-service:
     depends_on:
@@ -168,7 +168,7 @@ services:
           cpus: '1'
           memory: 1G
     hostname: post-storage-memcached
-    image: memcached
+    image: yg397/memcached:netem
 
   post-storage-mongodb:
     deploy:
@@ -181,7 +181,7 @@ services:
           cpus: '4'
           memory: 16G
     hostname: post-storage-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   post-storage-service:
     depends_on:
@@ -213,7 +213,7 @@ services:
           cpus: '4'
           memory: 4G
     hostname: social-graph-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   social-graph-redis:
     deploy:
@@ -226,7 +226,7 @@ services:
           cpus: '4'
           memory: 4G
     hostname: social-graph-redis
-    image: redis
+    image: yg397/redis:netem
 
   social-graph-service:
     depends_on:
@@ -291,7 +291,7 @@ services:
           cpus: '1'
           memory: 1G
     hostname: url-shorten-memcached
-    image: memcached
+    image: yg397/memcached:netem
 
   url-shorten-mongodb:
     deploy:
@@ -304,7 +304,7 @@ services:
           cpus: '4'
           memory: 16G
     hostname: url-shorten-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   url-shorten-service:
     depends_on:
@@ -336,7 +336,7 @@ services:
           cpus: '1'
           memory: 1G
     hostname: user-memcached
-    image: memcached
+    image: yg397/memcached:netem
 
   user-mention-service:
     depends_on:
@@ -367,7 +367,7 @@ services:
           cpus: '1'
           memory: 2G
     hostname: user-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   user-service:
     depends_on:
@@ -399,7 +399,7 @@ services:
           cpus: '4'
           memory: 16G
     hostname: user-timeline-mongodb
-    image: mongo
+    image: yg397/mongo:netem
 
   user-timeline-redis:
     deploy:
@@ -412,7 +412,7 @@ services:
           cpus: '1'
           memory: 1G
     hostname: user-timeline-redis
-    image: redis
+    image: yg397/redis:netem
 
   user-timeline-service:
     depends_on:
