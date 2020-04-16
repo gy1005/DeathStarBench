@@ -13,6 +13,7 @@ ARG RESTY_PCRE_VERSION="8.42"
 ARG JAEGER_TRACING_VERSION="0.4.2"
 ARG NGINX_OPENTRACING_VERSION="0.8.0"
 ARG OPENTRACING_CPP_VERSION="1.5.1"
+ARG LUA_RESTY_JWT_VERSION="0.2.0-0"
 ARG RESTY_J="1"
 ARG NUM_CPUS="40"
 ARG RESTY_CONFIG_OPTIONS="\
@@ -198,7 +199,7 @@ RUN cd /usr/local/openresty/lualib/thrift/src \
 ENV LUA_PATH=$LUA_PATH;/gen-lua/?.lua
 
 RUN luarocks install long \
-    && luarocks install lua-resty-jwt \
+    && luarocks install lua-resty-jwt ${LUA_RESTY_JWT_VERSION} \
     && ldconfig
 
 
